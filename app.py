@@ -14,10 +14,10 @@ app = Flask(__name__)
 
 app.secret_key = 'xyzsdfg'
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'library_lens'
+app.config['MYSQL_HOST'] = 'sql113.infinityfree.com'
+app.config['MYSQL_USER'] = 'if0_37917058'
+app.config['MYSQL_PASSWORD'] = '9609@Hanan'
+app.config['MYSQL_DB'] = 'if0_37917058_library_lens'
 
 mysql = MySQL(app)
 
