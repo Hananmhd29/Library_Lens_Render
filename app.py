@@ -75,6 +75,16 @@ def logout():
     session.pop('library_id', None)
     return redirect(url_for('login'))
 
+@app.route('/dbtest')
+def dbtest():
+    try:
+        conn = mysql.connection  # or get_db() if using PyMySQL
+        cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT 1")
+        result = cursor.fetchone()
+        return f"✅ DB connection OK: {result}"
+    except Exception as e:
+        return f"❌ DB error: {str(e)}"
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
