@@ -14,7 +14,12 @@ app = Flask(__name__)
 
 app.secret_key = 'xyzsdfg'
 
-app.config['MYSQL_HOST'] = '130.162.54.212'
+#app.config['MYSQL_HOST'] = 'sql.freedb.tech'
+#app.config['MYSQL_USER'] = 'freedb_dangerliker'
+#app.config['MYSQL_PASSWORD'] = '5PgKphnk#5kZC#R'
+#app.config['MYSQL_DB'] = 'freedb_library_lens'
+
+app.config['MYSQL_HOST'] = 'sql.freedb.tech'
 app.config['MYSQL_USER'] = 'freedb_dangerliker'
 app.config['MYSQL_PASSWORD'] = '5PgKphnk#5kZC#R'
 app.config['MYSQL_DB'] = 'freedb_library_lens'
