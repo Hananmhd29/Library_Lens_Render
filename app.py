@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_mysqldb import MySQL, MySQLdb
+import os
 import pickle
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -11,20 +12,19 @@ top_rated_books = pickle.load(open('top_rated_books.pkl', 'rb'))
 all_books = pickle.load(open('all_books.pkl', 'rb'))
 
 app = Flask(__name__)
-
 app.secret_key = 'xyzsdfg'
 
-#app.config['MYSQL_HOST'] = 'sql.freedb.tech'
-#app.config['MYSQL_USER'] = 'freedb_dangerliker'
-#app.config['MYSQL_PASSWORD'] = '5PgKphnk#5kZC#R'
-#app.config['MYSQL_DB'] = 'freedb_library_lens'
+# -------------------------
+# MYSQL CONFIG (Render)
+# -------------------------
 
-app.config['MYSQL_HOST'] = 'sql.freedb.tech'
-app.config['MYSQL_USER'] = 'freedb_dangerliker'
-app.config['MYSQL_PASSWORD'] = '5PgKphnk#5kZC#R'
-app.config['MYSQL_DB'] = 'freedb_library_lens'
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'sql.freedb.tech')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'freedb_dangerliker')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', '5PgKphnk#5kZC#R')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB', 'freedb_library_lens')
 
 mysql = MySQL(app)
+
 
 # Handle the presence or absence of 'Genre' column
 if 'Genre' in all_books.columns:
