@@ -18,7 +18,7 @@ app.config['MYSQL_HOST'] = 'switchback.proxy.rlwy.net'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'cXTZpooeTBtviGNQJlfDgCPioDPHWugl'
 app.config['MYSQL_DB'] = 'railway'
-app.config['MYSQL_PORT] = '49612'
+
 
 
 
