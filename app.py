@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_mysqldb import MySQL, MySQLdb
 import pickle
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import os
+import psycopg2
+
 
 # Load the preprocessed data
 top_rated_books = pickle.load(open('top_rated_books.pkl', 'rb'))
@@ -14,17 +16,22 @@ app = Flask(__name__)
 
 app.secret_key = 'xyzsdfg'
 
-app.config['MYSQL_HOST'] = 'switchback.proxy.rlwy.net'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'cXTZpooeTBtviGNQJlfDgCPioDPHWugl'
-app.config['MYSQL_DB'] = 'railway'
-app.config['MYSQL_PORT'] = 49612
+def get_db_connection():
+    conn = psycopg2.connect(
+        host=os.getenv("dpg-d4mutdvdiees739iaf7g-a"),
+        database=os.getenv("library_lens"),
+        user=os.getenv("library_lens_user"),
+        password=os.getenv("KyZgM19BabSqwsxppEu96upzxPQ02NQ5"),
+        port=os.getenv("5432")
+    )
+    return conn
 
 
 
 
 
-mysql = MySQL(app)
+
+#mysql = MySQL(app)
 
 # Handle the presence or absence of 'Genre' column
 if 'Genre' in all_books.columns:
