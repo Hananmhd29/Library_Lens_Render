@@ -65,9 +65,15 @@ def login():
     if request.method == 'POST' and 'library_id' in request.form and 'password' in request.form:
         library_id = request.form['library_id']
         password = request.form['password']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM user WHERE library_id = %s AND password = %s', (library_id, password))
-        user = cursor.fetchone()
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # PostgreSQL: same %s placeholder
+        cur.execute("SELECT * FROM user WHERE library_id = %s AND password = %s", (library_id, password))
+        user = cur.fetchone()
+
+        cur.close()
+        conn.close()
         if user:
             session['loggedin'] = True
             session['userid'] = user['userid']
@@ -105,20 +111,34 @@ def register():
         userName = request.form['name']
         password = request.form['password']
         library_id = request.form['library_id']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM user WHERE library_id = %s', (library_id,))
-        account = cursor.fetchone()
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Check if account exists
+        cur.execute("SELECT * FROM user WHERE library_id = %s", (library_id,))
+        account = cur.fetchone()
+
         if account:
             message = 'Account already exists!'
         elif not userName or not password or not library_id:
             message = 'Please fill out the form!'
         else:
-            cursor.execute('INSERT INTO user VALUES (NULL, %s, %s, %s)', (userName, library_id, password))
-            mysql.connection.commit()
+            # PostgreSQL: SERIAL auto-increment works with DEFAULT
+            cur.execute("INSERT INTO user (name, library_id, password) VALUES (%s, %s, %s)",
+                        (userName, library_id, password))
+            conn.commit()
             message = 'You have successfully registered!'
+
+        cur.close()
+        conn.close()
+
     elif request.method == 'POST':
         message = 'Please fill out the form!'
+
     return render_template('registernew.html', message=message)
+    
+        
 
 
 @app.route('/all_book')
