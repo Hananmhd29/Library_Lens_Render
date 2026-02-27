@@ -56,8 +56,8 @@ def index():
 def login():
     message = ''
     if request.method == 'POST':
-        library_id = request.form.get['library_id']
-        password = request.form.get['password']
+        library_id = request.form.get('library_id')
+        password = request.form.get('password')
 
         user = users_collection.find_one({
             "library_id": library_id,
@@ -67,7 +67,7 @@ def login():
             
         if user:
             session['loggedin'] = True
-            session['userid'] = user['userid']
+            session['userid'] = str(user['_id'])
             session['name'] = user['name']
             session['library_id'] = user['library_id']
             message = 'Logged in successfully!'
@@ -90,9 +90,9 @@ def logout():
 def register():
     message = ''
     if request.method == 'POST':
-        userName = request.form.get['name']
-        password = request.form.get['password']
-        library_id = request.form.get['library_id']
+        userName = request.form.get('name')
+        password = request.form.get('password')
+        library_id = request.form.get('library_id')
 
         existing_user = users_collection.find_one({"library_id": library_id})
         
@@ -108,9 +108,6 @@ def register():
             })
             message = 'You have successfully registered!'
            
-
-    elif request.method == 'POST':
-        message = 'Please fill out the form!'
 
     return render_template('registernew.html', message=message)
     
