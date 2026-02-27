@@ -5,27 +5,20 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import os
-import psycopg2
-
+from pymongo import MongoClient
 
 # Load the preprocessed data
 top_rated_books = pickle.load(open('top_rated_books.pkl', 'rb'))
 all_books = pickle.load(open('all_books.pkl', 'rb'))
 
 app = Flask(__name__)
-
 app.secret_key = 'xyzsdfg'
 
-def get_db_connection():
-    conn = psycopg2.connect(
-        host=os.getenv("dpg-d4mutdvdiees739iaf7g-a"),
-        database=os.getenv("library_lens"),
-        user=os.getenv("library_lens_user"),
-        password=os.getenv("KyZgM19BabSqwsxppEu96upzxPQ02NQ5"),
-        port=os.getenv("5432")
-    )
-    return conn
-
+# ✅ MongoDB connection
+mongo_uri = os.environ.get("MONGO_URI")
+client = MongoClient(mongo_uri)
+db = client.get_database()   # gets database from URI
+users_collection = db["user"]
 
 
 
@@ -62,18 +55,16 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     message = ''
-    if request.method == 'POST' and 'library_id' in request.form and 'password' in request.form:
-        library_id = request.form['library_id']
-        password = request.form['password']
-        conn = get_db_connection()
-        cur = conn.cursor()
+    if request.method == 'POST':
+        library_id = request.form.get['library_id']
+        password = request.form.get['password']
 
-        # PostgreSQL: same %s placeholder
-        cur.execute("SELECT * FROM user WHERE library_id = %s AND password = %s", (library_id, password))
-        user = cur.fetchone()
+        user = users_collection.find_one({
+            "library_id": library_id,
+            "password": password
+        })
 
-        cur.close()
-        conn.close()
+            
         if user:
             session['loggedin'] = True
             session['userid'] = user['userid']
@@ -93,45 +84,30 @@ def logout():
     session.pop('library_id', None)
     return redirect(url_for('login'))
 
-@app.route('/dbtest')
-def dbtest():
-    try:
-        conn = mysql.connection  # or get_db() if using PyMySQL
-        cursor = conn.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT 1")
-        result = cursor.fetchone()
-        return f"✅ DB connection OK: {result}"
-    except Exception as e:
-        return f"❌ DB error: {str(e)}"
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     message = ''
-    if request.method == 'POST' and 'name' in request.form and 'password' in request.form and 'library_id' in request.form:
-        userName = request.form['name']
-        password = request.form['password']
-        library_id = request.form['library_id']
+    if request.method == 'POST':
+        userName = request.form.get['name']
+        password = request.form.get['password']
+        library_id = request.form.get['library_id']
 
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Check if account exists
-        cur.execute("SELECT * FROM user WHERE library_id = %s", (library_id,))
-        account = cur.fetchone()
-
-        if account:
+        existing_user = users_collection.find_one({"library_id": library_id})
+        
+        if existing_user:
             message = 'Account already exists!'
         elif not userName or not password or not library_id:
             message = 'Please fill out the form!'
         else:
-            # PostgreSQL: SERIAL auto-increment works with DEFAULT
-            cur.execute("INSERT INTO user (name, library_id, password) VALUES (%s, %s, %s)",
-                        (userName, library_id, password))
-            conn.commit()
+            users_collection.insert_one({
+                "name": userName,
+                "library_id": library_id,
+                "password": password
+            })
             message = 'You have successfully registered!'
-
-        cur.close()
-        conn.close()
+           
 
     elif request.method == 'POST':
         message = 'Please fill out the form!'
